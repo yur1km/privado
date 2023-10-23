@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background-color: #0e1012;
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #f5f5f5;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .loading-animation {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #f5f5f5;
+            margin: 0 5px;
+            animation: blink 2s infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        .dot:nth-child(4) {
+            animation-delay: 1.5s;
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: -100px;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+        }
+
+        .image-overlay img {
+            width: 100px;
+            height: 100px;
+        }
+
+        .motivation-text {
+            font-size: 18px;
+            text-align: center;
+            margin-top: 20px;
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 2s steps(8000, end);
+        }
+
+        @keyframes blink {
+            0%, 100% {
+                background: #f5f5f5;
+                transform: scale(1);
+            }
+            50% {
+                background: #f5f5f5;
+                transform: scale(1.2);
+            }
+        }
+
+        @keyframes typing {
+            from {
+                width: 0;
+            }
+            to {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="loading-animation">
+            <div class="image-overlay">
+                <img src="./run-svgrepo-com.svg" alt="Imagem">
+            </div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+    </div>
+    <div class="motivation-text" id="motivation"></div>
+
+    <script>
+        const phrases = [
+            "Viva a vida ao máximo.",
+            "Acredite em você mesmo.",
+            "Seja positivo e sorria.",
+            "O sucesso depende da persistência.",
+            "Você é capaz de grandes conquistas.",
+            "Cada dia é uma nova oportunidade.",
+            "Ame a vida que você vive.",
+            "Aprenda com os erros do passado.",
+            "O otimismo leva ao sucesso.",
+            "A persistência supera o talento.",
+            "Aja como se fosse impossível falhar.",
+            "Faça o que você ama.",
+            "A gratidão transforma a vida.",
+            "Siga seus sonhos com paixão.",
+            "Crie suas próprias oportunidades.",
+            "Mantenha o foco em seus objetivos.",
+            "Seja a mudança que você deseja ver.",
+            "A vida é feita de escolhas.",
+            "O sucesso começa com a autodisciplina.",
+            "Supere desafios com determinação.",
+            "Cada dia é uma dádiva.",
+            "Acredite no poder do agora.",
+            "Inspire-se e inspire os outros.",
+            "Nunca pare de aprender.",
+            "Mantenha sua mente aberta.",
+            "A paciência é uma virtude.",
+            "O conhecimento é a chave do sucesso.",
+            "Sonhe, acredite, alcance.",
+            "Aja com coragem.",
+            "Crie seu próprio destino.",
+            "Acredite na magia da vida.",
+            "Sua jornada é única.",
+            "Acredite na sua capacidade de superar.",
+            "A vida é um presente precioso.",
+            "O sucesso é uma jornada, não um destino.",
+            "Faça o impossível acontecer.",
+            "A força interior é seu maior ativo.",
+            "Aprenda com o passado, viva o presente.",
+            "Você é mais forte do que imagina.",
+            "Acredite na beleza dos seus sonhos.",
+            "O amor e o riso são contagiantes.",
+            "Cada dia é uma página em branco."
+        ];
+
+        const motivationText = document.getElementById("motivation");
+
+        function showRandomMotivation() {
+            const randomIndex = Math.floor(Math.random() * phrases.length);
+            motivationText.textContent = phrases[randomIndex];
+        }
+
+        showRandomMotivation();
+
+        // Após 2 segundos, redireciona para outra página (substitua 'sua-url-aqui' pela URL desejada)
+        setTimeout(() => {
+            window.location.href = "app.html";
+        }, 5000);
+    </script>
+</body>
+</html>
