@@ -1,103 +1,143 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-  <style>
-    #map {
-      height: 400px;
-      width: 100%;
-    }
-  </style>
-</head>
-<body>
-  <div id="map"></div>
-  <p id="distance">Distância percorrida: 0 km</p>
-  <p id="path">Caminho percorrido:</p>
-  <p id="time">Tempo de caminhada: 0 segundos</p>
-
-  <script>
-    let map;
-    let markers = [];
-    let watchId;
-    let totalDistance = 0;
-    let pathCoordinates = [];
-    let startTime;
-
-    function initMap() {
-      map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: -34.397, lng: 150.644 },
-        zoom: 14,
-      });
-
-      if ("geolocation" in navigator) {
-        // Solicitar permissão para acessar a localização do usuário
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const initialLocation = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            };
-            map.setCenter(initialLocation);
-            addMarker(initialLocation);
-
-            // Iniciar rastreamento contínuo da posição
-            watchId = navigator.geolocation.watchPosition(updatePosition);
-            startTime = new Date().getTime();
-          },
-          (error) => {
-            console.error("Erro ao obter localização:", error);
-          }
-        );
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style>
+      body {
+        background-color: #0e1012;
+        color: #f5f5f5;
+        font-family: 'Poppins', sans-serif;
+        text-align: center;
       }
-    }
 
-    function addMarker(location) {
-      const marker = new google.maps.Marker({
-        position: location,
-        map: map,
-      });
-      markers.push(marker);
-      if (markers.length > 1) {
-        const prevMarker = markers[markers.length - 2];
-        const distance = google.maps.geometry.spherical.computeDistanceBetween(
-          prevMarker.getPosition(),
-          marker.getPosition()
-        );
-        totalDistance += distance / 1000; // Convertendo para quilômetros
-        document.getElementById("distance").textContent = `Distância percorrida: ${totalDistance.toFixed(2)} km`;
+      #map {
+        height: 400px;
+        width: 100%;
       }
-      pathCoordinates.push(location);
-      const pathLine = new google.maps.Polyline({
-        path: pathCoordinates,
-        geodesic: true,
-        strokeColor: "#FF0000",
-        strokeOpacity: 1.0,
-        strokeWeight: 2,
+
+      button {
+        background-color: #3195ff;
+        color: #f5f5f5;
+        border: none;
+        padding: 10px 20px;
+        font-size: 18px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+
+      button:hover {
+        background-color: #f5f5f5;
+        color: #0e1012;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Inicie sua caminhada</h1>
+    <button id="startButton">Começar Caminhada</button>
+    <p>Distância percorrida: <span id="distance">0 km</span></p>
+    <p>Tempo de caminhada: <span id="time">0 segundos</span></p>
+    <div id="map"></div>
+    <script>
+      let map;
+      let markers = [];
+      let watchId;
+      let startTime;
+      let timer;
+
+      function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: -34.397, lng: 150.644 },
+          zoom: 14,
+          mapTypeId: "satellite",
+        });
+
+        if ("geolocation" in navigator) {
+          // Solicitar permissão para acessar a localização do usuário
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const initialLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              };
+              map.setCenter(initialLocation);
+              addMarker(initialLocation);
+
+              // Iniciar rastreamento contínuo da posição
+              watchId = navigator.geolocation.watchPosition(updatePosition);
+            },
+            (error) => {
+              console.error("Erro ao obter localização:", error);
+            }
+          );
+        }
+      }
+
+      function addMarker(location) {
+        const marker = new google.maps.Marker({
+          position: location,
+          map: map,
+        });
+        markers.push(marker);
+      }
+
+      function updatePosition(position) {
+        const updatedLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        addMarker(updatedLocation);
+
+        // Atualizar a distância percorrida
+        document.getElementById("distance").textContent = calculateDistance(markers);
+
+        // Atualizar o tempo em tempo real
+        if (!startTime) {
+          startTime = position.timestamp;
+          updateTime(0);
+        } else {
+          const currentTime = position.timestamp;
+          const elapsedTimeInSeconds = Math.round((currentTime - startTime) / 1000);
+          updateTime(elapsedTimeInSeconds);
+        }
+      }
+
+      function updateTime(elapsedTimeInSeconds) {
+        const minutes = Math.floor(elapsedTimeInSeconds / 60);
+        const seconds = elapsedTimeInSeconds % 60;
+        const timeString = minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
+        document.getElementById("time").textContent = timeString;
+      }
+
+      function calculateDistance(markers) {
+        if (markers.length < 2) {
+          return "0 km";
+        }
+
+        let totalDistance = 0;
+
+        for (let i = 1; i < markers.length; i++) {
+          const p1 = markers[i - 1].getPosition();
+          const p2 = markers[i].getPosition();
+          totalDistance += google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
+        }
+
+        return (totalDistance / 1000).toFixed(2) + " km";
+      }
+
+      document.getElementById("startButton").addEventListener("click", () => {
+        // Limpar o mapa e os dados ao começar uma nova caminhada
+        markers.forEach((marker) => marker.setMap(null));
+        markers = [];
+        document.getElementById("distance").textContent = "0 km";
+        document.getElementById("time").textContent = "0 segundos";
+        startTime = null;
+        clearInterval(timer);
       });
-      pathLine.setMap(map);
-      updatePath();
-    }
-
-    function updatePosition(position) {
-      const updatedLocation = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      };
-      addMarker(updatedLocation);
-      // Atualiza o tempo de caminhada
-      const currentTime = new Date().getTime();
-      const elapsedTime = (currentTime - startTime) / 1000; // Converte para segundos
-      document.getElementById("time").textContent = `Tempo de caminhada: ${elapsedTime.toFixed(0)} segundos`;
-    }
-
-    function updatePath() {
-      // Aqui, você pode usar a variável "pathCoordinates" para obter a rota completa.
-      // pathCoordinates é um array com todas as coordenadas registradas durante a caminhada.
-      // Você pode usá-lo para exibir o caminho percorrido no mapa ou para cálculos adicionais.
-      const pathString = pathCoordinates.map((coord) => `[${coord.lat}, ${coord.lng}]`).join(" -> ");
-      document.getElementById("path").textContent = `Caminho percorrido: ${pathString}`;
-    }
-  </script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyABNwiNkpF_GInkgXA0pgzFFDOaQN6troI&libraries=geometry&callback=initMap"></script>
-</body>
+    </script>
+    <script
+      async
+      defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyABNwiNkpF_GInkgXA0pgzFFDOaQN6troI&libraries=geometry&callback=initMap"
+    ></script>
+  </body>
 </html>
